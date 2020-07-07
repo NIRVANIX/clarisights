@@ -1,5 +1,6 @@
 # clarisights
 Lang - Python + Django
+
 DB - MongoDB
 
 File to upload csv input to mongo DB -  
