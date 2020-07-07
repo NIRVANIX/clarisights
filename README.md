@@ -15,7 +15,7 @@ Logic for fetching and processing data -
 clarisight_assign/ads_analysis/ads_processing.py
 Method - ads_data
 Method takes start_date, end_date, dimensions and metrics as input. 
-Fetch the Data (Dimentsions + metrics cols) from DB with where date between start_date and end_date. Group by the result on dimensions with sum applied over metrics columns.
+Fetch the Data (Dimentsions + metrics cols) from DB with where date between start_date and end_date. Group by the result on dimensions with sum applied over metrics columns. Returns a json with output for each metric as key and value as dimensions and metric sum value.
 
 Test file - 
 /clarisight_assign/ads_analysis/tests.py
