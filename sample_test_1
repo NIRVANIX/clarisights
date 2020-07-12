@@ -1,0 +1,13 @@
+date,query,count
+2020-06-01,best web hosting,60
+2020-06-01,cheap web hosting,40
+2020-06-01,test,10
+2020-06-01,test1,0.5
+2020-06-02,best web hosting,60
+2020-06-02,cheap web hosting,40
+2020-06-02,test,10
+2020-06-02,test1,5
+2020-06-03,best web hosting,2000
+2020-06-03,cheap web hosting,4000
+2020-06-03,test,100
+2020-06-03,test1,0.5

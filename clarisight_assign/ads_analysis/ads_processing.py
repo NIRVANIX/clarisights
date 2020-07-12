@@ -3,9 +3,39 @@ from datetime import datetime
 
 import pandas as pd
 
-def ads_data(start_date, end_date, dimensions, metrics, mongo_client_db):
-		db = mongo_client_db
+def get_ads_data(db_conn, start_date, end_date, select_dict):
+	result = db_conn.google_ads.find(
+			{
+				"date": {"$gte" : start_date},
+				"date": {"$lte" : end_date}
+			},
+			select_dict
+		)
+	return result
 
+def get_count_ads_data_less_than_50(db_conn, start_date, end_date, select_dict):
+	result = db_conn.google_ads_less_50.aggregate([
+		{"$match": 
+			{"$and": [
+				{ "date": { "$gte": start_date } },
+        		{ "date": { "$lte": end_date } }]
+        	}
+        },
+		{"$group": 
+			{
+				"_id": 1,
+				"all" : { "$sum": "$count"}
+			}
+		}]);
+	
+	result = list(result)
+	if len(result) > 0:
+		return result[0]['all']
+	else:
+		return 0
+
+def ads_data(start_date, end_date, dimensions, metrics, db_conn):
+		
 		select_dict = {'_id' : 0}
 		for dim in dimensions:
 			select_dict[dim] = 1
@@ -15,23 +45,18 @@ def ads_data(start_date, end_date, dimensions, metrics, mongo_client_db):
 		start_date = datetime.strptime(start_date, '%Y-%m-%d')
 		end_date = datetime.strptime(end_date, '%Y-%m-%d')
 		
-		result = db.google_ads.find(
-			{
-				"date": {"$gte" : start_date},
-				"date": {"$lte" : end_date}
-			},
-			select_dict
-		)
+		result = get_ads_data(db_conn, start_date, end_date, select_dict)
 
 		df = pd.DataFrame(result)
-		grouped_df = df.groupby(dimensions).sum().reset_index()
+		result_df = df.groupby(dimensions).sum().reset_index()
 		
-		result_dict = {}
+		less_50_count = get_count_ads_data_less_than_50(db_conn, start_date, end_date, select_dict)
+		
+		result_df = result_df.append({'query' : 'Queries with count < 50',
+		 			'count' : less_50_count} , ignore_index=True)
 
+		result_dict = {}
 		for metric in metrics:
-			result_df = grouped_df.loc[grouped_df[metric] >= 50]
-			result_df = result_df.append({'query' : 'Queries with count < 50',
-		 				'count' : sum(grouped_df.loc[grouped_df[metric] < 50][metric])} , ignore_index=True)
 			result_dict[metric] = result_df.to_dict('records')
 		
 		return result_dict
